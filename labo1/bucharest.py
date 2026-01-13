@@ -15,8 +15,6 @@ class Node:
     city: str
     cost: int
     costRoute: int
-    
-
 
 def get_successors(node: Node, prolog_thread: PrologThread)-> list[Node]:
     query = f"s({node.city}, Cities)."
