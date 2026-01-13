@@ -4,6 +4,10 @@
 
 from swiplserver import PrologMQI, PrologThread
 from dataclasses import dataclass
+from pathlib import Path
+import prolog
+
+PROLOG_PATH = str((Path(prolog.__file__).parent / "roumanie").relative_to(Path.cwd())).replace('\\', '/')
 
 @dataclass
 class Node:
@@ -11,8 +15,10 @@ class Node:
     city: str
     cost: int
     costRoute: int
+    
 
-def get_successors(node: Node, prolog_thread: PrologThread):
+
+def get_successors(node: Node, prolog_thread: PrologThread)-> list[Node]:
     query = f"s({node.city}, Cities)."
     results = prolog_thread.query(query)[0]['Cities']
     successors = []
@@ -62,10 +68,10 @@ if __name__ == '__main__':
     with PrologMQI() as mqi_file:
         with mqi_file.create_thread() as prolog_thread:
             # Load a prolog file
-            result = prolog_thread.query("[prolog/roumanie].")
+            result = prolog_thread.query(f"[{PROLOG_PATH}].")
 
             if not result:
-                print("Erreur lors du chargement du fichier prolog/roumanie.pl")
+                print(f"Erreur lors du chargement du fichier {PROLOG_PATH}")
                 exit(1)
                 
             start_node = Node(parents=None,city="arad", cost=0, costRoute=0)
