@@ -39,16 +39,29 @@ def createFuzzyController():
     cons1.accumulation_method = np.fmax
 
     # TODO: Create membership functions
-    ant1['membership1'] = fuzz.trapmf(ant1.universe, [-1, -0.5, 0.5, 1])
-    ant1['membership2'] = fuzz.trapmf(ant1.universe, [-0.75, -0.5, 0.5, 0.75])
+    ant1['leftLeaning'] = fuzz.trapmf(ant1.universe, [-1, -1, -0.0005, 0])
+    ant1['centerLeaning'] = fuzz.trapmf(ant1.universe, [-0.1, -0.025, 0.025, 0.1])
+    ant1['rightLeaning'] = fuzz.trapmf(ant1.universe, [0, 0.0005, 1, 1])
 
-    ant2['membership1'] = fuzz.trapmf(ant1.universe, [-1, -0.5, 0.5, 1])
+    ant2['fastLeft'] = fuzz.trapmf(ant2.universe, [-1, -1, -0.0005, 0])
+    ant2['slow'] = fuzz.trapmf(ant2.universe, [-0.05, -0.025, 0.025, 0.05])
+    ant2['fastRight'] = fuzz.trapmf(ant2.universe, [0, 0.0005, 1, 1])
 
-    cons1['membership1'] = fuzz.trimf(cons1.universe, [-1, 0, 1])
+    cons1['mouvementGauche'] = fuzz.trapmf(ant1.universe, [-1, -1, -0.5, 0])
+    cons1['noMouvement'] = fuzz.trimf(ant1.universe, [-0.1, 0, 0.1])
+    cons1['mouvementDroite'] = fuzz.trapmf(ant1.universe, [0, 0.5, 1, 1])
 
     # TODO: Define the rules.
     rules = []
-    rules.append(ctrl.Rule(antecedent=(ant1['membership1'] & ant2['membership1']), consequent=cons1['membership1']))
+    rules.append(ctrl.Rule(antecedent=(ant1['leftLeaning'] & ant2['fastLeft']), consequent=cons1['mouvementGauche']))
+    rules.append(ctrl.Rule(antecedent=(ant1['leftLeaning'] & ant2['slow']), consequent=cons1['mouvementGauche']))
+    rules.append(ctrl.Rule(antecedent=(ant1['leftLeaning'] & ant2['fastRight']), consequent=cons1['mouvementGauche']))
+    rules.append(ctrl.Rule(antecedent=(ant1['centerLeaning'] & ant2['fastLeft']), consequent=cons1['mouvementGauche']))
+    rules.append(ctrl.Rule(antecedent=(ant1['centerLeaning'] & ant2['slow']), consequent=cons1['noMouvement']))
+    rules.append(ctrl.Rule(antecedent=(ant1['centerLeaning'] & ant2['fastRight']), consequent=cons1['mouvementDroite']))
+    rules.append(ctrl.Rule(antecedent=(ant1['rightLeaning'] & ant2['fastLeft']), consequent=cons1['mouvementDroite']))
+    rules.append(ctrl.Rule(antecedent=(ant1['rightLeaning'] & ant2['slow']), consequent=cons1['mouvementDroite']))
+    rules.append(ctrl.Rule(antecedent=(ant1['rightLeaning'] & ant2['fastRight']), consequent=cons1['mouvementDroite']))
 
     # Conjunction (and_func) and disjunction (or_func) methods for rules:
     #     np.fmin
@@ -102,8 +115,8 @@ if __name__ == '__main__':
             cartPosition, cartVelocity, poleAngle, poleVelocityAtTip = observation
 
             # TODO: set the input to the fuzzy system
-            fuzz_ctrl.input['input1'] = 0
-            fuzz_ctrl.input['input2'] = 0
+            fuzz_ctrl.input['input1'] = poleAngle
+            fuzz_ctrl.input['input2'] = poleVelocityAtTip
 
             fuzz_ctrl.compute()
             if VERBOSE:
