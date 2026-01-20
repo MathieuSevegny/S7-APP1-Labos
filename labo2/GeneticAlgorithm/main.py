@@ -98,7 +98,7 @@ if __name__ == '__main__':
     numparams = 2
 
     # TODO: adjust population size and encoding precision
-    popsize = 40
+    popsize = 400
     nbits = 16
     ga_sim = genetic.Genetic(numparams, popsize, nbits)
     ga_sim.init_pop()
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         fig, sp = init_plot()
 
     # TODO: Adjust optimization meta-parameters
-    numGenerations = 15
+    numGenerations = 150
     mutationProb = 0.01
     crossoverProb = 0.8
     ga_sim.set_sim_parameters(numGenerations, mutationProb, crossoverProb)

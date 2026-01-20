@@ -47,9 +47,9 @@ def createFuzzyController():
     ant2['slow'] = fuzz.trapmf(ant2.universe, [-0.05, -0.025, 0.025, 0.05])
     ant2['fastRight'] = fuzz.trapmf(ant2.universe, [0, 0.0005, 1, 1])
 
-    cons1['mouvementGauche'] = fuzz.trapmf(ant1.universe, [-1, -1, -0.5, 0])
+    cons1['mouvementGauche'] = fuzz.trapmf(ant1.universe, [-1, -1, -0.7, 0])
     cons1['noMouvement'] = fuzz.trimf(ant1.universe, [-0.1, 0, 0.1])
-    cons1['mouvementDroite'] = fuzz.trapmf(ant1.universe, [0, 0.5, 1, 1])
+    cons1['mouvementDroite'] = fuzz.trapmf(ant1.universe, [0, 0.7, 1, 1])
 
     # TODO: Define the rules.
     rules = []
