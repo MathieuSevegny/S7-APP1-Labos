@@ -108,7 +108,7 @@ class Genetic:
     def get_best_individual(self):
         # Prints the best individual for all of the simulated generations
         # TODO : Decode individual for better readability
-        return self.bestIndividual
+        return bin2ufloat(self.bestIndividual.reshape((1, -1)), self.nbits)
 
     def encode_individuals(self):
         # Encode the population from a vector of continuous values to a binary string.
