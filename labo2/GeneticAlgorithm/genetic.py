@@ -173,9 +173,9 @@ class Genetic:
         # Output:
         # - POPULATION, a binary matrix with each row encoding an individual.
         # TODO: Perform a crossover between two individuals
-        coupure = np.random.randint(0,self.nbits)
-        start = pairs[0][:,0:coupure]
-        end = pairs[1][:,coupure:]
+        cut = np.random.randint(0,self.nbits)
+        start = pairs[0][:,0:cut]
+        end = pairs[1][:,cut:]
         return np.concatenate((start,end),1)
     def doMutation(self):
         # Perform a mutation operation over the entire population.
@@ -184,21 +184,8 @@ class Genetic:
         # - MUTATION_PROB, the mutation probability.
         # Output:
         # - POPULATION, the new population.
-        # TODO: Apply mutation to the population
-        #self.population =  np.zeros((self.pop_size, self.num_params * self.nbits))
-        """
-        
-        doMutation = np.random.choice([0,1],p=[1 - self.mutation_prob, self.mutation_prob],size=len(self.population))
-        for i, x in enumerate(self.population):
-            if doMutation[i]:
-                mutation_point = np.random.randint(0,len(x))
-                x[mutation_point] = not x[mutation_point]
-        """
         mask = np.random.rand(*self.population.shape) < self.mutation_prob
-        
         self.population = np.logical_xor(self.population, mask).astype(np.uint8)
-        
-        
 
     def new_gen(self):
         # Perform a the pair selection, crossover and mutation and
