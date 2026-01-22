@@ -152,12 +152,15 @@ class Genetic:
         # Output:
         # - PAIRS, a list of two ndarrays [IND1 IND2]  each encoding one member of the pair
         # TODO: select pairs of individual in the population
-        #idx1 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
-        #idx2 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
 
-        idx1 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=(np.clip(self.fitness,0,100000)/np.sum(np.clip(self.fitness,0,100000))))
-        idx2 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=(np.clip(self.fitness,0,100000)/np.sum(np.clip(self.fitness,0,100000))))
+        clipped_fitness = np.clip(self.fitness,0,100000)
+        sum_fitness = np.sum(clipped_fitness)
+        probabilities = clipped_fitness / sum_fitness
+        
+        idx1 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=probabilities)
+        idx2 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=probabilities)
         return [self.population[idx1, :], self.population[idx2, :]]
+        
 
     def doCrossover(self, pairs):
         # Perform a crossover operation between two individuals, with a given probability
