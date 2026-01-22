@@ -109,8 +109,9 @@ class Genetic:
     def get_best_individual(self):
         # Prints the best individual for all of the simulated generations
         # TODO : Decode individual for better readability
-        binVals = [2**x for x in range(0,self.nbits)]
-        return np.array([np.sum(self.bestIndividual[0:int(self.nbits)]*binVals),np.sum(self.bestIndividual[int(self.nbits):]*binVals)])/2**16*6-3
+        bits = np.asarray(self.bestIndividual).reshape(self.num_params, self.nbits)
+        cfloat = bin2ufloat(bits, self.nbits)
+        return cfloat * 6 - 3
 
     def encode_individuals(self):
         # Encode the population from a vector of continuous values to a binary string.
