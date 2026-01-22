@@ -119,11 +119,10 @@ class Genetic:
         # - NBITS, the number of bits per indivual used for encoding.
         # Output:
         # - POPULATION, a binary matrix with each row encoding an individual.
-        # TODO: encode individuals into binary vectors
-        self.population = np.zeros((self.pop_size, self.num_params * self.nbits))
-
-        self.population = np.array([ (np.concat(([(x[0] >> i) & 1 for i in range(0,self.nbits)],[(x[1] >> i) & 1 for i in range(0,self.nbits)]))) for x in self.cvalues])
-        pass
+        denom = 2**self.nbits - 1
+        bits_per_param = [ufloat2bin(self.cvalues[:, j] / denom, self.nbits) for j in range(self.num_params)]
+        bits = np.concatenate(bits_per_param, axis=1).astype(np.uint8)
+        self.population = bits
 
     def decode_individuals(self):
         # Decode an individual from a binary string to a vector of continuous values.
@@ -133,11 +132,25 @@ class Genetic:
         # Output:
         # - CVALUES, a vector of continuous values representing the parameters.
         # TODO: decode individuals from binary vectors
-        self.cvalues = np.zeros((self.pop_size, self.num_params),dtype=np.uint16)
+        #self.cvalues = np.zeros((self.pop_size, self.num_params),dtype=np.uint16)
 
-        binVals = [2**x for x in range(0,self.nbits)]
-        self.cvalues = np.array([[np.sum(x[0:int(self.nbits)]*binVals),np.sum(x[int(self.nbits):]*binVals)] for x in self.population],dtype=np.uint16)
-        pass
+        #binVals = [2**x for x in range(0,self.nbits)]
+        #self.cvalues = np.array([[np.sum(x[0:int(self.nbits)]*binVals),np.sum(x[int(self.nbits):]*binVals)] for x in self.population],dtype=np.uint16)
+        #pass
+    
+        # Decode individuals from binary vectors using bin2ufloat.
+        # The population stores bits concatenated per-parameter along axis=1.
+        denom = 2**self.nbits - 1
+        bits = np.asarray(self.population)
+        bits = bits.reshape(self.pop_size, self.num_params, self.nbits)
+
+        # For each parameter, convert its bit-matrix to floats in [0,1]
+        cfloat = np.zeros((self.pop_size, self.num_params), dtype=float)
+        for j in range(self.num_params):
+            cfloat[:, j] = bin2ufloat(bits[:, j, :], self.nbits)
+
+        # Store integer representation consistent with original code
+        self.cvalues = np.round(cfloat * denom).astype(np.uint16)
 
     def doSelection(self):
         # Select pairs of individuals from the population.
