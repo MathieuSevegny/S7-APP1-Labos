@@ -151,7 +151,6 @@ class Genetic:
         # - NUMPAIRS, the number of pairs of individual to generate.
         # Output:
         # - PAIRS, a list of two ndarrays [IND1 IND2]  each encoding one member of the pair
-        # TODO: select pairs of individual in the population
 
         clipped_fitness = np.clip(self.fitness,0,100000)
         sum_fitness = np.sum(clipped_fitness)
@@ -175,12 +174,9 @@ class Genetic:
         # - POPULATION, a binary matrix with each row encoding an individual.
         # TODO: Perform a crossover between two individuals
         coupure = np.random.randint(0,self.nbits)
-        debut = pairs[0][:,0:coupure]
-        fin = pairs[1][:,coupure:]
-        halfpop1 = pairs[0]
-        halfpop2 = pairs[1]
-        assert np.shape(np.concatenate((debut,fin),1)) == (self.pop_size,self.nbits*2)
-        return np.concatenate((debut,fin),1)
+        start = pairs[0][:,0:coupure]
+        end = pairs[1][:,coupure:]
+        return np.concatenate((start,end),1)
     def doMutation(self):
         # Perform a mutation operation over the entire population.
         # Input:
@@ -190,8 +186,19 @@ class Genetic:
         # - POPULATION, the new population.
         # TODO: Apply mutation to the population
         #self.population =  np.zeros((self.pop_size, self.num_params * self.nbits))
-        self.population = np.array([ x if np.random.choice([True,False],1,True,[self.mutation_prob,1-self.mutation_prob]) else x for x in self.population])
-        pass
+        """
+        
+        doMutation = np.random.choice([0,1],p=[1 - self.mutation_prob, self.mutation_prob],size=len(self.population))
+        for i, x in enumerate(self.population):
+            if doMutation[i]:
+                mutation_point = np.random.randint(0,len(x))
+                x[mutation_point] = not x[mutation_point]
+        """
+        mask = np.random.rand(*self.population.shape) < self.mutation_prob
+        
+        self.population = np.logical_xor(self.population, mask).astype(np.uint8)
+        
+        
 
     def new_gen(self):
         # Perform a the pair selection, crossover and mutation and

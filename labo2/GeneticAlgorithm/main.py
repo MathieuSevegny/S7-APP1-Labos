@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     # TODO: Adjust optimization meta-parameters
     numGenerations = 50
-    mutationProb = 0.01
+    mutationProb = 0.001
     crossoverProb = 0.8
     ga_sim.set_sim_parameters(numGenerations, mutationProb, crossoverProb)
 
