@@ -95,12 +95,15 @@ if __name__ == '__main__':
     SHOW_LANDSCAPE = True
 
     # The parameters for encoding the population
-    numparams = 2
+    numparams = 12
 
     # TODO: adjust population size and encoding precision
     popsize = 100
     nbits = 16
-    ga_sim = genetic.Genetic(numparams, popsize, nbits)
+    min_val = -3
+    max_val = 3
+    
+    ga_sim = genetic.Genetic(numparams, popsize, nbits, min_val, max_val)
     ga_sim.init_pop()
     ga_sim.set_fit_fun(fitness_function)
 

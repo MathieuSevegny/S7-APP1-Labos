@@ -37,7 +37,7 @@ class Genetic:
     nbits = 0
     population = []
 
-    def __init__(self, num_params, pop_size, nbits):
+    def __init__(self, num_params, pop_size, nbits, min_val, max_val):
         # Input:
         # - NUMPARAMS, the number of parameters to optimize.
         # - POPSIZE, the population size.
@@ -58,6 +58,10 @@ class Genetic:
         self.avgMaxFitnessRecord = np.zeros((self.num_generations,))
         self.current_gen = 0
         self.crossover_modulo = 0
+        self.min_val = min_val
+        self.max_val = max_val
+        self.range_val = max_val - min_val
+        self.encoded_max = 2**nbits
 
     def init_pop(self):
         # Initialize the population as a matrix, where each individual is a binary string.
@@ -91,7 +95,7 @@ class Genetic:
         # Evaluate the fitness function
         # Record the best individual and average of the current generation
         # WARNING, number of arguments need to be adjusted if fitness function changes
-        self.fitness = self.fit_fun(self.cvalues[:, 0]/2**16*6-3, self.cvalues[:, 1]/2**16*6-3)
+        self.fitness = self.fit_fun(self.cvalues[:, 0]/self.encoded_max*self.range_val+self.min_val, self.cvalues[:, 1]/self.encoded_max*self.range_val+self.min_val)
         if np.max(self.fitness) > self.bestIndividualFitness:
             self.bestIndividualFitness = np.max(self.fitness)
             self.bestIndividual = self.population[self.fitness == np.max(self.fitness)][0]
@@ -111,7 +115,7 @@ class Genetic:
         # TODO : Decode individual for better readability
         bits = np.asarray(self.bestIndividual).reshape(self.num_params, self.nbits)
         cfloat = bin2ufloat(bits, self.nbits)
-        return cfloat * 6 - 3
+        return cfloat * self.range_val + self.min_val
 
     def encode_individuals(self):
         # Encode the population from a vector of continuous values to a binary string.
