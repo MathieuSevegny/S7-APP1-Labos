@@ -47,7 +47,7 @@ class Genetic:
         self.nbits = nbits
         self.fitness = np.zeros((self.pop_size, 1))
         self.fit_fun = np.zeros
-        self.cvalues = np.zeros((self.pop_size, num_params))
+        self.cvalues = np.zeros((self.pop_size, num_params),dtype=np.uint16)
         self.num_generations = 1
         self.mutation_prob = 0
         self.crossover_prob = 0
@@ -64,6 +64,7 @@ class Genetic:
         # Output:
         # - POPULATION, a binary matrix whose rows correspond to encoded individuals.
         self.population = np.zeros((self.pop_size, self.num_params * self.nbits))
+        self.population = np.random.randint(0,2,(self.pop_size, self.num_params * self.nbits))
 
     def set_fit_fun(self, fun):
         # Set the fitness function
@@ -90,7 +91,7 @@ class Genetic:
         # Evaluate the fitness function
         # Record the best individual and average of the current generation
         # WARNING, number of arguments need to be adjusted if fitness function changes
-        self.fitness = self.fit_fun(self.cvalues[:, 0], self.cvalues[:, 1])
+        self.fitness = self.fit_fun(self.cvalues[:, 0]/2**16*6-3, self.cvalues[:, 1]/2**16*6-3)
         if np.max(self.fitness) > self.bestIndividualFitness:
             self.bestIndividualFitness = np.max(self.fitness)
             self.bestIndividual = self.population[self.fitness == np.max(self.fitness)][0]
@@ -108,7 +109,8 @@ class Genetic:
     def get_best_individual(self):
         # Prints the best individual for all of the simulated generations
         # TODO : Decode individual for better readability
-        return self.bestIndividual
+        binVals = [2**x for x in range(0,self.nbits)]
+        return np.array([np.sum(self.bestIndividual[0:int(self.nbits)]*binVals),np.sum(self.bestIndividual[int(self.nbits):]*binVals)])/2**16*6-3
 
     def encode_individuals(self):
         # Encode the population from a vector of continuous values to a binary string.
@@ -120,6 +122,9 @@ class Genetic:
         # TODO: encode individuals into binary vectors
         self.population = np.zeros((self.pop_size, self.num_params * self.nbits))
 
+        self.population = np.array([ (np.concat(([(x[0] >> i) & 1 for i in range(0,self.nbits)],[(x[1] >> i) & 1 for i in range(0,self.nbits)]))) for x in self.cvalues])
+        pass
+
     def decode_individuals(self):
         # Decode an individual from a binary string to a vector of continuous values.
         # Input:
@@ -128,7 +133,11 @@ class Genetic:
         # Output:
         # - CVALUES, a vector of continuous values representing the parameters.
         # TODO: decode individuals from binary vectors
-        self.cvalues = np.zeros((self.pop_size, self.num_params))
+        self.cvalues = np.zeros((self.pop_size, self.num_params),dtype=np.uint16)
+
+        binVals = [2**x for x in range(0,self.nbits)]
+        self.cvalues = np.array([[np.sum(x[0:int(self.nbits)]*binVals),np.sum(x[int(self.nbits):]*binVals)] for x in self.population],dtype=np.uint16)
+        pass
 
     def doSelection(self):
         # Select pairs of individuals from the population.
@@ -139,8 +148,11 @@ class Genetic:
         # Output:
         # - PAIRS, a list of two ndarrays [IND1 IND2]  each encoding one member of the pair
         # TODO: select pairs of individual in the population
-        idx1 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
-        idx2 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
+        #idx1 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
+        #idx2 = np.random.randint(0, self.pop_size, (int(self.pop_size/2),))
+
+        idx1 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=(np.clip(self.fitness,0,100000)/np.sum(np.clip(self.fitness,0,100000))))
+        idx2 = np.random.choice(self.pop_size,self.pop_size,replace=True,p=(np.clip(self.fitness,0,100000)/np.sum(np.clip(self.fitness,0,100000))))
         return [self.population[idx1, :], self.population[idx2, :]]
 
     def doCrossover(self, pairs):
@@ -155,10 +167,13 @@ class Genetic:
         # Output:
         # - POPULATION, a binary matrix with each row encoding an individual.
         # TODO: Perform a crossover between two individuals
+        coupure = np.random.randint(0,self.nbits)
+        debut = pairs[0][:,0:coupure]
+        fin = pairs[1][:,coupure:]
         halfpop1 = pairs[0]
         halfpop2 = pairs[1]
-        return np.vstack((halfpop1, halfpop2))
-
+        assert np.shape(np.concatenate((debut,fin),1)) == (self.pop_size,self.nbits*2)
+        return np.concatenate((debut,fin),1)
     def doMutation(self):
         # Perform a mutation operation over the entire population.
         # Input:
@@ -167,7 +182,9 @@ class Genetic:
         # Output:
         # - POPULATION, the new population.
         # TODO: Apply mutation to the population
-        self.population =  np.zeros((self.pop_size, self.num_params * self.nbits))
+        #self.population =  np.zeros((self.pop_size, self.num_params * self.nbits))
+        self.population = np.array([ x if np.random.choice([True,False],1,True,[self.mutation_prob,1-self.mutation_prob]) else x for x in self.population])
+        pass
 
     def new_gen(self):
         # Perform a the pair selection, crossover and mutation and

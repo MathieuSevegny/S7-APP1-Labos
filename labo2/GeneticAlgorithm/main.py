@@ -98,7 +98,7 @@ if __name__ == '__main__':
     numparams = 2
 
     # TODO: adjust population size and encoding precision
-    popsize = 400
+    popsize = 100
     nbits = 16
     ga_sim = genetic.Genetic(numparams, popsize, nbits)
     ga_sim.init_pop()
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         fig, sp = init_plot()
 
     # TODO: Adjust optimization meta-parameters
-    numGenerations = 150
+    numGenerations = 50
     mutationProb = 0.01
     crossoverProb = 0.8
     ga_sim.set_sim_parameters(numGenerations, mutationProb, crossoverProb)
@@ -119,10 +119,11 @@ if __name__ == '__main__':
         ga_sim.decode_individuals()
         ga_sim.eval_fit()
         ga_sim.print_progress()
+        ga_sim.encode_individuals()
 
         if SHOW_LANDSCAPE:
             # Plot landscape
-            sp.set_data(ga_sim.cvalues[:, 0], ga_sim.cvalues[:, 1])
+            sp.set_data(ga_sim.cvalues[:, 0]/2**16*6-3, ga_sim.cvalues[:, 1]/2**16*6-3)
             sp.set_3d_properties(ga_sim.fitness)
             fig.canvas.draw()
             plt.pause(0.02)
