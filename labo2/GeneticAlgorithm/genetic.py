@@ -131,15 +131,6 @@ class Genetic:
         # - NUMPARAMS, the number of parameters for an individual.
         # Output:
         # - CVALUES, a vector of continuous values representing the parameters.
-        # TODO: decode individuals from binary vectors
-        #self.cvalues = np.zeros((self.pop_size, self.num_params),dtype=np.uint16)
-
-        #binVals = [2**x for x in range(0,self.nbits)]
-        #self.cvalues = np.array([[np.sum(x[0:int(self.nbits)]*binVals),np.sum(x[int(self.nbits):]*binVals)] for x in self.population],dtype=np.uint16)
-        #pass
-    
-        # Decode individuals from binary vectors using bin2ufloat.
-        # The population stores bits concatenated per-parameter along axis=1.
         denom = 2**self.nbits - 1
         bits = np.asarray(self.population)
         bits = bits.reshape(self.pop_size, self.num_params, self.nbits)
